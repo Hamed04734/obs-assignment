@@ -13,41 +13,34 @@ const { HttpInstrumentation } = require("@opentelemetry/instrumentation-http");
 const { registerInstrumentations } = require("@opentelemetry/instrumentation");
 
 module.exports = (serviceName) => {
-    // Initialize the tracer provider
     const provider = new NodeTracerProvider({
         resource: new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
         }),
     });
 
-    // Configure the Jaeger exporter
     const jaegerExporter = new JaegerExporter({
-        serviceName: serviceName, // Name of your service
+        serviceName: serviceName, 
     });
     provider.addSpanProcessor(new SimpleSpanProcessor(jaegerExporter));
 
-    // (Optional) Add a Console exporter for debugging
     const consoleExporter = new ConsoleSpanExporter();
     provider.addSpanProcessor(new SimpleSpanProcessor(consoleExporter));
 
-    // Register the tracer provider
     provider.register();
 
-    // Register instrumentations
     registerInstrumentations({
         instrumentations: [
-            new HttpInstrumentation(), // Captures HTTP requests
-            new ExpressInstrumentation(), // Captures Express requests
+            new HttpInstrumentation(), 
+            new ExpressInstrumentation(), 
             new MongoDBInstrumentation({
-                enhancedDatabaseReporting: true, // Enables detailed MongoDB queries
-            }), // Captures MongoDB operations
+                enhancedDatabaseReporting: true, 
+            }), 
         ],
         tracerProvider: provider,
     });
 
-    // Debug Logging
     console.log("Tracing initialized for service:", serviceName);
 
-    // Return the tracer
     return trace.getTracer(serviceName);
 };
